@@ -13,9 +13,9 @@ export default function Home() {
         window.Pi.init
       ) {
         try {
-          window.Pi.init({ version: "2.0", sandbox: true }); // 🧪 Chạy Testnet
+          window.Pi.init({ version: "2.0", sandbox: false }); // ✅ MAINNET
           setPi(window.Pi);
-          setStatus("✅ Pi SDK đã sẵn sàng.");
+          setStatus("✅ Pi SDK đã sẵn sàng (Mainnet).");
         } catch (err) {
           setStatus("❌ Không khởi tạo được Pi SDK.");
           console.error(err);
@@ -30,14 +30,14 @@ export default function Home() {
 
   const handlePayment = async () => {
     if (!pi) {
-      alert("❌ Pi SDK chưa sẵn sàng. Hãy mở trong Pi Browser Testnet.");
+      alert("❌ Pi SDK chưa sẵn sàng. Hãy mở trong Pi Browser (Mainnet).");
       return;
     }
 
     try {
       const payment = await pi.createPayment({
         amount: 1,
-        memo: "Arena Pi Testnet Payment",
+        memo: "Arena Pi Mainnet Payment",
         metadata: { arena: true },
         onReadyForServerApproval: async (paymentId) => {
           console.log("🔁 Approving:", paymentId);
@@ -86,10 +86,10 @@ export default function Home() {
 
   return (
     <main style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>🏟 Arena Pi Payment Test (Testnet)</h1>
+      <h1>🏟 Arena Pi Payment Test (Mainnet)</h1>
       <p>{status}</p>
       <button onClick={handlePayment} disabled={!pi}>
-        💰 Thanh toán Test Pi
+        💰 Thanh toán Pi Thật
       </button>
     </main>
   );
