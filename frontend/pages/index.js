@@ -8,7 +8,7 @@ export default function Home() {
     const checkPi = setInterval(() => {
       if (window.Pi && window.Pi.createPayment && window.Pi.init) {
         try {
-          window.Pi.init({ version: "2.0", sandbox: true }); // chạy TESTNET
+          window.Pi.init({ version: "2.0", sandbox: true }); // Testnet
           setPi(window.Pi);
           setStatus("✅ Pi SDK đã sẵn sàng.");
         } catch (err) {
@@ -33,24 +33,30 @@ export default function Home() {
         memo: "Test Pi Payment",
         metadata: { test: true },
         onReadyForServerApproval: async (paymentId) => {
-          console.log("🔃 Approving payment...", paymentId);
-          const res = await fetch("https://arena-pi-backend.onrender.com/api/payment/approve", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paymentId }),
-          });
-          const data = await res.json();
-          console.log("✅ Approve response:", data);
+          try {
+            const res = await fetch("https://arena-pi-backend.onrender.com/api/payment/approve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ paymentId }),
+            });
+            const data = await res.json();
+            console.log("✅ Approve response:", data);
+          } catch (err) {
+            console.error("❌ Approve failed:", err);
+          }
         },
         onReadyForServerCompletion: async (paymentId, txid) => {
-          console.log("🔃 Completing payment...", paymentId, txid);
-          const res = await fetch("https://arena-pi-backend.onrender.com/api/payment/complete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paymentId, txid }),
-          });
-          const data = await res.json();
-          console.log("✅ Completion response:", data);
+          try {
+            const res = await fetch("https://arena-pi-backend.onrender.com/api/payment/complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ paymentId, txid }),
+            });
+            const data = await res.json();
+            console.log("✅ Complete response:", data);
+          } catch (err) {
+            console.error("❌ Completion failed:", err);
+          }
         },
         onCancel: (paymentId) => {
           console.log("❌ Payment cancelled:", paymentId);
