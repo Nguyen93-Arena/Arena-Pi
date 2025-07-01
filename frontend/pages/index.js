@@ -8,7 +8,7 @@ export default function Home() {
     const checkPi = setInterval(() => {
       if (window.Pi && window.Pi.createPayment && window.Pi.init) {
         try {
-          window.Pi.init({ version: "2.0", sandbox: true }); // Testnet
+          window.Pi.init({ version: "2.0", sandbox: true }); // 👉 Testnet
           setPi(window.Pi);
           setStatus("✅ Pi SDK đã sẵn sàng.");
         } catch (err) {
@@ -30,8 +30,8 @@ export default function Home() {
     try {
       const payment = await pi.createPayment({
         amount: 1,
-        memo: "Test Pi Payment",
-        metadata: { test: true },
+        memo: "Arena Test Payment",
+        metadata: { arena: true },
         onReadyForServerApproval: async (paymentId) => {
           try {
             const res = await fetch("https://arena-pi-backend.onrender.com/api/payment/approve", {
@@ -73,7 +73,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>🏟 Arena Pi Payment Test (Testnet)</h1>
       <p>{status}</p>
       <button onClick={createPayment} disabled={!pi}>
