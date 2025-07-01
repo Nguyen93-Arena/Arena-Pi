@@ -13,7 +13,7 @@ export default function Home() {
         window.Pi.init
       ) {
         try {
-          window.Pi.init({ version: "2.0", sandbox: true });  // Testnet
+          window.Pi.init({ version: "2.0", sandbox: true }); // 🧪 Chạy Testnet
           setPi(window.Pi);
           setStatus("✅ Pi SDK đã sẵn sàng.");
         } catch (err) {
@@ -41,10 +41,9 @@ export default function Home() {
         metadata: { arena: true },
         onReadyForServerApproval: async (paymentId) => {
           console.log("🔁 Approving:", paymentId);
-          // Gọi API backend sau khi gọi approve
           try {
             const res = await fetch(
-              "https://YOUR_RENDER_BACKEND_URL/api/payment/approve",
+              "https://arena-pi.onrender.com/api/payment/approve",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -61,7 +60,7 @@ export default function Home() {
           console.log("🔁 Completing:", paymentId, txid);
           try {
             const res = await fetch(
-              "https://YOUR_RENDER_BACKEND_URL/api/payment/complete",
+              "https://arena-pi.onrender.com/api/payment/complete",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -75,7 +74,8 @@ export default function Home() {
           }
         },
         onCancel: (paymentId) => console.warn("❌ Cancelled:", paymentId),
-        onError: (error, pmt) => console.error("❌ Error:", error, pmt),
+        onError: (error, payment) =>
+          console.error("❌ Payment Error:", error, payment),
       });
 
       console.log("💰 Payment created:", payment);
