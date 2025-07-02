@@ -15,10 +15,10 @@ export default function Home() {
         try {
           window.Pi.init({ version: "2.0", sandbox: false }); // ✅ MAINNET
           setPi(window.Pi);
-          setStatus("✅ Pi SDK đã sẵn sàng (Mainnet).");
+          setStatus("✅ Pi SDK đã sẵn sàng.");
         } catch (err) {
           setStatus("❌ Không khởi tạo được Pi SDK.");
-          console.error(err);
+          alert("❌ Lỗi khi init Pi SDK: " + err.message);
         } finally {
           clearInterval(interval);
         }
@@ -30,7 +30,7 @@ export default function Home() {
 
   const handlePayment = async () => {
     if (!pi) {
-      alert("❌ Pi SDK chưa sẵn sàng. Hãy mở trong Pi Browser (Mainnet).");
+      alert("❌ Pi SDK chưa sẵn sàng. Hãy mở app bằng Pi Browser (Mainnet).");
       return;
     }
 
@@ -40,7 +40,7 @@ export default function Home() {
         memo: "Arena Pi Mainnet Payment",
         metadata: { arena: true },
         onReadyForServerApproval: async (paymentId) => {
-          console.log("🔁 Approving:", paymentId);
+          alert("🔁 Đang gọi approve: " + paymentId);
           try {
             const res = await fetch(
               "https://arena-pi.onrender.com/api/payment/approve",
@@ -51,13 +51,13 @@ export default function Home() {
               }
             );
             const data = await res.json();
-            console.log("✅ Approve response:", data);
+            alert("✅ Server approve thành công.");
           } catch (err) {
-            console.error("❌ Approve failed:", err);
+            alert("❌ Approve thất bại: " + err.message);
           }
         },
         onReadyForServerCompletion: async (paymentId, txid) => {
-          console.log("🔁 Completing:", paymentId, txid);
+          alert("🔁 Đang gọi complete: " + paymentId + ", TXID: " + txid);
           try {
             const res = await fetch(
               "https://arena-pi.onrender.com/api/payment/complete",
@@ -68,19 +68,22 @@ export default function Home() {
               }
             );
             const data = await res.json();
-            console.log("✅ Complete response:", data);
+            alert("✅ Server complete thành công.");
           } catch (err) {
-            console.error("❌ Completion failed:", err);
+            alert("❌ Completion thất bại: " + err.message);
           }
         },
-        onCancel: (paymentId) => console.warn("❌ Cancelled:", paymentId),
-        onError: (error, payment) =>
-          console.error("❌ Payment Error:", error, payment),
+        onCancel: (paymentId) => {
+          alert("❌ Giao dịch bị huỷ: " + paymentId);
+        },
+        onError: (error, payment) => {
+          alert("❌ Lỗi thanh toán: " + error.message);
+        },
       });
 
-      console.log("💰 Payment created:", payment);
+      alert("💰 Payment created: " + payment.identifier);
     } catch (err) {
-      console.error("❌ Tạo payment lỗi:", err);
+      alert("❌ Không thể tạo payment: " + err.message);
     }
   };
 
