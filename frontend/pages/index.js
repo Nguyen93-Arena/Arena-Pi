@@ -1,30 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (!window.Pi) {
-        alert("❌ Không tìm thấy Pi SDK. Hãy mở app bằng Pi Browser.");
-      } else {
-        console.log("✅ Pi SDK found. Tiến hành đăng nhập...");
+  const [username, setUsername] = useState(null);
+  const [error, setError] = useState(null);
 
-        window.Pi.authenticate(
-          ["username", "payments"],
-          function (auth) {
-            console.log("✅ Đăng nhập thành công:", auth);
-          },
-          function (error) {
-            console.error("❌ Lỗi đăng nhập:", error);
-          }
-        );
+  useEffect(() => {
+    const checkPiSDK = async () => {
+      if (typeof window === "undefined" || !window.Pi) {
+        setError("❌ Không tìm thấy Pi SDK. Hãy mở bằng Pi Browser.");
+        return;
       }
-    }
+
+      try {
+        console.log("🔐 Pi SDK found. Đang xác thực...");
+        window.Pi.authenticate(['username'], function(auth) {
+          console.log("✅ Auth thành công:", auth);
+          setUsername(auth.user.username);
+        }, function(error) {
+          console.error("❌ Lỗi khi xác thực:", error);
+          setError("Lỗi khi xác thực: " + error);
+        });
+      } catch (err) {
+        console.error("❌ Exception:", err);
+        setError("Lỗi hệ thống: " + err.message);
+      }
+    };
+
+    checkPiSDK();
   }, []);
 
   return (
     <main style={{ textAlign: "center", marginTop: "100px" }}>
       <h1>🎮 Arena Pi (Testnet)</h1>
-      <p>Đang kiểm tra SDK & đăng nhập...</p>
+
+      {username && <p>👋 Xin chào, <strong>{username}</strong>!</p>}
+
+      {!username && !error && <p>🔄 Đang xác thực với Pi...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </main>
   );
 }
