@@ -1,8 +1,8 @@
-import { ref, get, set, update } from "firebase/database";
-import { database } from "../firebase-config"; // nhớ đường dẫn đúng
+import { ref, get, set } from "firebase/database";
+import { database } from "../firebase-config"; // đúng đường dẫn
 
-// Trong hàm handleMatch, nếu thắng:
-if (outcome.includes("thắng")) {
+// Giả sử bạn đã có `username` từ Pi SDK
+if (outcome.includes("thắng") && username) {
   const userRef = ref(database, "players/" + username);
   get(userRef).then((snapshot) => {
     const currentWins = snapshot.exists() ? snapshot.val().wins || 0 : 0;
