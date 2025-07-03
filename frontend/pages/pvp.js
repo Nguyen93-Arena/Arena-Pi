@@ -9,24 +9,29 @@ export default function PvP() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Xác thực Pi SDK
   useEffect(() => {
     if (typeof window === "undefined" || !window.Pi) {
-      setError("❌ Không tìm thấy Pi SDK. Hãy mở bằng Pi Browser.");
+      setError("❌ Không tìm thấy Pi SDK. Vui lòng mở bằng Pi Browser.");
       setLoading(false);
       return;
     }
 
     window.Pi.authenticate(["username"], (auth) => {
+      console.log("✅ Đã xác thực Pi:", auth);
       setUsername(auth.user.username);
       setLoading(false);
     }, (err) => {
+      console.error("❌ Lỗi xác thực:", err);
       setError("❌ Lỗi xác thực: " + err);
       setLoading(false);
     });
   }, []);
 
+  // Tìm đối thủ và xử lý kết quả
   const handleMatch = () => {
-    console.log("🔍 Tìm đối thủ đã được nhấn");
+    console.log("🎮 Đã bấm Tìm đối thủ");
+
     if (!username) {
       setError("❌ Không có username, không thể đấu");
       return;
@@ -45,6 +50,9 @@ export default function PvP() {
       get(userRef).then(snapshot => {
         const wins = snapshot.exists() ? snapshot.val().wins || 0 : 0;
         set(userRef, { username, wins: wins + 1 });
+        console.log("🎉 Cập nhật điểm thắng:", wins + 1);
+      }).catch(err => {
+        console.error("❌ Firebase error:", err);
       });
     }
   };
@@ -56,7 +64,8 @@ export default function PvP() {
       fontFamily: "Arial",
       color: "#00ffaa",
       background: "#000",
-      minHeight: "100vh"
+      minHeight: "100vh",
+      padding: "20px"
     }}>
       <h1>⚔️ Arena Pi - PvP</h1>
 
@@ -65,7 +74,9 @@ export default function PvP() {
 
       {username && (
         <>
-          <p>👤 <strong>{username}</strong> VS <strong>{opponent}</strong></p>
+          <p style={{ fontSize: "18px" }}>
+            👤 <strong>{username}</strong> VS <strong>{opponent}</strong>
+          </p>
           <button onClick={handleMatch} style={{
             padding: "12px 24px",
             marginTop: "20px",
