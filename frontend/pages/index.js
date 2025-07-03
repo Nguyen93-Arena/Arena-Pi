@@ -1,99 +1,86 @@
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [status, setStatus] = useState("🔄 Đang kiểm tra Pi SDK...");
-  const [pi, setPi] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [sdkReady, setSdkReady] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (
-        typeof window !== "undefined" &&
-        window.Pi &&
-        window.Pi.createPayment &&
-        window.Pi.init
-      ) {
-        try {
-          window.Pi.init({ version: "2.0", sandbox: true })
-          setPi(window.Pi);
-          setStatus("✅ Pi SDK đã sẵn sàng.");
-        } catch (err) {
-          setStatus("❌ Không khởi tạo được Pi SDK.");
-          alert("❌ Lỗi khi init Pi SDK: " + err.message);
-        } finally {
-          clearInterval(interval);
-        }
-      }
-    }, 500);
+    // Chạy khi Pi SDK đã có sẵn trong Pi Browser
+    if (typeof window !== "undefined" && window.Pi) {
+      window.Pi.init({ version: "2.0", sandbox: true });
 
-    return () => clearInterval(interval);
+      const authenticate = async () => {
+        try {
+          const scopes = ["payments"];
+          const user = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+          setUsername(user.username);
+          setSdkReady(true);
+        } catch (err) {
+          console.error("Lỗi xác thực:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      authenticate();
+    } else {
+      console.warn("Không tìm thấy Pi SDK. Hãy mở trong Pi Browser.");
+      setLoading(false);
+    }
+
+    function onIncompletePaymentFound(payment) {
+      console.log("⚠️ Thanh toán chưa hoàn tất:", payment);
+    }
   }, []);
 
   const handlePayment = async () => {
-    if (!pi) {
-      alert("❌ Pi SDK chưa sẵn sàng. Hãy mở app bằng Pi Browser (Mainnet).");
-      return;
-    }
-
     try {
-      const payment = await pi.createPayment({
-        amount: 1,
-        memo: "Arena Pi Mainnet Payment",
-        metadata: { arena: true },
-        onReadyForServerApproval: async (paymentId) => {
-          alert("🔁 Đang gọi approve: " + paymentId);
-          try {
-            const res = await fetch(
-              "https://arena-pi.onrender.com/api/payment/approve",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentId }),
-              }
-            );
-            const data = await res.json();
-            alert("✅ Server approve thành công.");
-          } catch (err) {
-            alert("❌ Approve thất bại: " + err.message);
-          }
+      const payment = await window.Pi.createPayment(
+        {
+          amount: 1,
+          memo: "Thanh toán test bằng Pi",
+          metadata: { type: "test" },
         },
-        onReadyForServerCompletion: async (paymentId, txid) => {
-          alert("🔁 Đang gọi complete: " + paymentId + ", TXID: " + txid);
-          try {
-            const res = await fetch(
-              "https://arena-pi.onrender.com/api/payment/complete",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ paymentId, txid }),
-              }
-            );
-            const data = await res.json();
-            alert("✅ Server complete thành công.");
-          } catch (err) {
-            alert("❌ Completion thất bại: " + err.message);
-          }
-        },
-        onCancel: (paymentId) => {
-          alert("❌ Giao dịch bị huỷ: " + paymentId);
-        },
-        onError: (error, payment) => {
-          alert("❌ Lỗi thanh toán: " + error.message);
-        },
-      });
-
-      alert("💰 Payment created: " + payment.identifier);
+        {
+          onReadyForServerApproval: (paymentId) => {
+            console.log("✅ Sẵn sàng phê duyệt:", paymentId);
+          },
+          onReadyForServerCompletion: (paymentId) => {
+            console.log("✅ Sẵn sàng hoàn tất:", paymentId);
+            window.Pi.completePayment(paymentId);
+            alert("✅ Giao dịch test thành công!");
+          },
+          onCancel: () => {
+            alert("❌ Bạn đã huỷ giao dịch.");
+          },
+          onError: (err) => {
+            console.error("Lỗi:", err);
+            alert("❌ Lỗi thanh toán: " + err.message);
+          },
+        }
+      );
     } catch (err) {
-      alert("❌ Không thể tạo payment: " + err.message);
+      console.error("Lỗi tạo giao dịch:", err);
+      alert("⚠️ Không thể tạo giao dịch.");
     }
   };
 
   return (
-    <main style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>🏟 Arena Pi Payment Test (Mainnet)</h1>
-      <p>{status}</p>
-      <button onClick={handlePayment} disabled={!pi}>
-        💰 Thanh toán Pi Thật
-      </button>
-    </main>
+    <div style={{ padding: 30, textAlign: "center", fontFamily: "sans-serif" }}>
+      <h1>🏟️ Arena Pi (Testnet)</h1>
+      {loading ? (
+        <p>🔄 Đang khởi tạo Pi SDK...</p>
+      ) : sdkReady ? (
+        <>
+          <p>✅ Đăng nhập thành công: <strong>{username}</strong></p>
+          <button onClick={handlePayment} style={{ padding: 12, fontSize: 16 }}>
+            💰 Thanh toán Pi Test
+          </button>
+        </>
+      ) : (
+        <p>❌ Không tìm thấy Pi SDK. Hãy mở app bằng Pi Browser.</p>
+      )}
+    </div>
   );
 }
