@@ -11,10 +11,10 @@ export default function Home() {
       console.log("🌐 Đang kiểm tra môi trường...");
       console.log("📱 User-Agent:", navigator.userAgent);
 
-      if (!navigator.userAgent.includes("PiBrowser")) {
-        setError("Vui lòng mở ứng dụng này bằng Pi Browser trên điện thoại.");
-        return;
-      }
+      if (!window.Pi) {
+  setError("❌ Không tìm thấy Pi SDK. Vui lòng đảm bảo mở bằng Pi Browser.");
+  return;
+}
 
       if (!window.Pi) {
         setError("❌ Không tìm thấy Pi SDK. Hãy mở bằng Pi Browser.");
