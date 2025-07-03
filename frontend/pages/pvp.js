@@ -1,14 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const characterData = {
+  warrior: { name: "Chiến Binh", icon: "🛡️" },
+  mage: { name: "Pháp Sư", icon: "🔥" },
+  assassin: { name: "Sát Thủ", icon: "🗡️" },
+};
 
 export default function PvP() {
-  const [status, setStatus] = useState("idle"); // idle, matching, matched, result
+  const [status, setStatus] = useState("idle"); // idle, matching, matched
   const [result, setResult] = useState(null);
+  const [playerChar, setPlayerChar] = useState(null);
+
+  useEffect(() => {
+    const charId = localStorage.getItem("arenaPiCharacter");
+    if (charId && characterData[charId]) {
+      setPlayerChar(characterData[charId]);
+    } else {
+      setPlayerChar({ name: "Chưa chọn", icon: "❓" });
+    }
+  }, []);
 
   const handleMatch = () => {
     setStatus("matching");
     setTimeout(() => {
       setStatus("matched");
-      setResult(Math.random() > 0.5 ? "🎉 Bạn thắng!" : "😢 Bạn thua...");
+      const outcome = Math.random() > 0.5 ? "🎉 Bạn thắng!" : "😢 Bạn thua...";
+      setResult(outcome);
     }, 2000);
   };
 
@@ -18,8 +35,8 @@ export default function PvP() {
 
       <div style={styles.avatars}>
         <div style={styles.player}>
-          <div style={styles.avatar}>🧙‍♂️</div>
-          <p>Bạn</p>
+          <div style={styles.avatar}>{playerChar?.icon}</div>
+          <p>{playerChar?.name || "Bạn"}</p>
         </div>
         <div style={styles.vs}>VS</div>
         <div style={styles.player}>
@@ -35,7 +52,6 @@ export default function PvP() {
       )}
 
       {status === "matching" && <p style={styles.status}>Đang tìm đối thủ...</p>}
-
       {status === "matched" && <p style={styles.result}>{result}</p>}
     </main>
   );
