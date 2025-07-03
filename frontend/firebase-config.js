@@ -6,13 +6,11 @@ const firebaseConfig = {
   authDomain: "arena-pi.firebaseapp.com",
   databaseURL: "https://arena-pi-default-rtdb.firebaseio.com",
   projectId: "arena-pi",
-  storageBucket: "arena-pi.firebasestorage.app",
+  storageBucket: "arena-pi.appspot.com",
   messagingSenderId: "93311684976",
   appId: "1:93311684976:web:a892e68a0e44ba5660ffb5",
   measurementId: "G-V0DJ1P575L"
 };
 
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-export { database };
+export const database = getDatabase(app);
